@@ -184,8 +184,8 @@ cython_debug/
 repo_list.py
 repo_list.txt
 
-data/*
+data/*/*
 playground/checkpoints/*
 
 !.gitkeep
-!where_to_download.txt
+!data/*/where_to_download.txt
