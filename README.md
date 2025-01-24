@@ -1,3 +1,3 @@
-# PiTensor - A PyTorch/TensorFlow implementation from scratch
+# <span style="vertical-align: middle;"><img src="assets/logo.png" alt="PiTensor" width="128" height="128" title="PiTensor"></span> PiTensor - A PyTorch/TensorFlow implementation from scratch
 
 TODO: ...
