@@ -21,7 +21,7 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/pitensor.git
+    git clone https://github.com/MarcoLoPinto/PiTensor.git
     cd pitensor
     ```
 
