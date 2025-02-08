@@ -186,6 +186,7 @@ repo_list.txt
 
 data/*/*
 *.npy
+assets/*.ai
 
 !.gitkeep
 !data/*/where_to_download.txt

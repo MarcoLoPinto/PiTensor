@@ -14,5 +14,5 @@ setup(
     install_requires=[
         "numpy",
     ],
-    python_requires='>=3.6'
+    python_requires='>=3.8'
 )
