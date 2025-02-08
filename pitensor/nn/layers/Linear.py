@@ -36,7 +36,7 @@ class Linear(Layer):
         # This computation effectively captures how each element of 
         # the input vector influences the loss through each weight.
         self.grad_weights = np.dot(self.input.T, grad_output)
-        # Compute gradient of the biases with respect to the loss.
+        # Compute gradient of the biases with respect to the loss, summing along the batch dimension (axis=0).
         self.grad_biases = np.sum(grad_output, axis=0)
         # Compute gradient of the input to this layer with respect to the loss and
         # this calculates how much each input value contributed to the loss.

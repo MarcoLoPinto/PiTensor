@@ -18,6 +18,14 @@ class Sequential(Layer):
             Iterator[Layer]: An iterator over the layers in the model.
         """
         return iter(self.layers)
+    
+    def __getitem__(self, index: int) -> Layer:
+        """Allows indexing into the layers like a list."""
+        return self.layers[index]
+
+    def __len__(self) -> int:
+        """Returns the number of layers."""
+        return len(self.layers)
 
     def forward(self, input) -> np.ndarray:
         """

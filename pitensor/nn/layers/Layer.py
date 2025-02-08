@@ -34,11 +34,13 @@ class Layer:
         Retrieve the parameters of the layer.
 
         Returns:
-            Dict[str, Any]: Dictionary containing the layer's parameters.
+            Dict[str, Any]: 
+                Dictionary containing the layer's parameters. 
+                It MUST include at least {'type': self.__class__.__name__} to identify the layer type.
         """
         raise NotImplementedError("Please implement the get_parameters function in order to return all needed trained parameters from your custom layer.")
     
-    def update_parameters(self: Dict[str, Any]) -> None:
+    def update_parameters(self, params: Dict[str, Any]) -> None:
         """
         Update the parameters of the layer.
 
