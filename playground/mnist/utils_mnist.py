@@ -2,9 +2,12 @@ import os, sys, csv
 from collections import defaultdict
 import numpy as np
 import pandas as pd
+
+from tqdm import tqdm
 from typing import Union
+
 # Import the necessary layers, losses, optimizers, and metrics:
-from pitensor.nn.layers import Linear, ReLU, Softmax, Sequential
+from pitensor.nn.layers import Sequential
 from pitensor.nn.losses import CrossEntropyLoss
 from pitensor.nn.optimizers import Optimizer, SGD
 from pitensor.metrics import precision_score, recall_score, f1_score
@@ -13,14 +16,11 @@ from playground.data_loaders.digit_recognizer import load_digit_recognizer
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
 
-class Network:
-    def __init__(self):
-        self.layers = Sequential(
-            Linear(784, 128),
-            ReLU(),
-            Linear(128, 10),
-            Softmax()
-        )
+class ClassificationNetwork:
+    """A simple sequential neural network for classification tasks.
+    """
+    def __init__(self, layers: Sequential):
+        self.layers = layers
         self.loss = CrossEntropyLoss()
 
     def backward(self):
@@ -47,6 +47,7 @@ class Network:
             val_data: np.ndarray, val_labels: np.ndarray, 
             epochs: int, batch_size: int, optimizer: Optimizer, 
             save_dir_path: str,
+            min_f1_score: float = 0.95
         ):
         num_batches = len(train_data) // batch_size
 
@@ -59,12 +60,14 @@ class Network:
             writer = csv.writer(f)
             writer.writerow(['train_loss', 'val_loss', 'precision', 'recall', 'f1'])
 
+        print(f"Training started for {epochs} epochs...")
+
         for epoch in range(epochs):
 
             # Train epoch:
 
             train_loss = 0.0
-            for i in range(num_batches):
+            for i in tqdm(range(num_batches), desc=f"Epoch {epoch + 1}/{epochs}"):
 
                 batch_data = train_data[i*batch_size : (i + 1)*batch_size]
                 batch_labels = train_labels[i*batch_size : (i + 1)*batch_size].astype(np.int64)
@@ -106,10 +109,11 @@ class Network:
                 writer = csv.writer(f)
                 writer.writerow([train_loss, val_loss, precision, recall, f1])
 
-            if f1 > best_f1 and epoch > int(epochs * 0.6):
+            if f1 > best_f1:
                 best_f1 = f1
-                self.save_parameters(save_path)
-                print(f"Best model saved with F1: {f1:.4f}")
+                if best_f1 > min_f1_score:
+                    self.save_parameters(save_path)
+                    print(f"Best model saved with F1: {f1:.4f}")
             
         print(f"Training completed!")
 
@@ -198,51 +202,3 @@ def plot_training_history(csv_path: str, save_path: str = None):
     plt.close()
 
 # endregion
-
-if __name__ == '__main__':
-    # Variables:
-    ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../')
-    DIGIT_RECOGNIZER_DIR = os.path.join(ROOT_DIR, 'data', 'digit-recognizer')
-    TRAIN_FILE = os.path.join(DIGIT_RECOGNIZER_DIR, 'train.csv')
-    TEST_FILE = os.path.join(DIGIT_RECOGNIZER_DIR, 'test.csv')
-    CHECKPOINT_DIR_PATH = os.path.join(ROOT_DIR, 'playground', 'checkpoints', 'mlp_mnist')
-    pipeline_phase = 'test'
-
-    # SET THE SEED
-    np.random.seed(1746911)
-
-    # Load the MNIST dataset
-    train_data, train_labels, val_data, val_labels, test_data = load_digit_recognizer(
-        TRAIN_FILE, TEST_FILE, train_val_percentage_split = 0.8
-    )
-
-    if pipeline_phase == 'train':
-        net = Network()
-        optimizer = SGD(learning_rate=0.01)
-        # net.load_parameters('best_model.npy')
-        net.train(
-            train_data, train_labels, 
-            val_data, val_labels, 
-            epochs = 300, 
-            batch_size = 64, 
-            optimizer = optimizer,
-            save_dir_path = CHECKPOINT_DIR_PATH
-        )
-
-        num_tests = 10
-        test_data_small = test_data[:num_tests]
-        preds = net.predict(test_data_small)
-        for test_i, pred_i in zip(test_data_small, preds):
-            plot_grayscale_image(test_i, title=f'pred {pred_i}')
-
-    elif pipeline_phase == 'test':
-        net = Network()
-        net.load_parameters(os.path.join(CHECKPOINT_DIR_PATH, 'best.npy'))
-
-        plot_training_history(os.path.join(CHECKPOINT_DIR_PATH, 'history.csv'), save_path=os.path.join(CHECKPOINT_DIR_PATH, 'history.png'))
-
-        num_tests = 10
-        test_data_small = test_data[:num_tests]
-        preds = net.predict(test_data_small)
-        for test_i, pred_i in zip(test_data_small, preds):
-            plot_grayscale_image(test_i, title=f'pred {pred_i}')

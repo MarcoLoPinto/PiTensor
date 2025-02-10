@@ -1,11 +1,8 @@
 import numpy as np
 from .Layer import Layer
 
-import numpy as np
-from .Layer import Layer
-
 class Conv2D(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
         """
         2D Convolutional Layer.
 
@@ -56,43 +53,51 @@ class Conv2D(Layer):
 
         return output
 
-    def backward(self, grad_output) -> np.ndarray:
+    def backward(self, grad_output):
         """
-        Computes the gradients for backpropagation.
+        Computes gradients for backpropagation.
 
         Args:
             grad_output (np.ndarray): Gradient of loss w.r.t output (batch_size, out_channels, out_height, out_width)
 
         Returns:
-            np.ndarray: Gradient of the loss with respect to the input.
+            np.ndarray: Gradient of loss w.r.t input (same shape as input).
         """
         batch_size, in_channels, height, width = self.input.shape
         _, _, kernel_height, kernel_width = self.weights.shape
 
-        # Initialize gradient arrays
-        grad_input = np.zeros_like(self.input)
+        # Fix: Ensure grad_input has the same shape as original input
+        grad_input = np.zeros((batch_size, in_channels, height, width))
         grad_weights = np.zeros_like(self.weights)
         grad_biases = np.sum(grad_output, axis=(0, 2, 3), keepdims=True)
 
-        # Compute gradients for weights and input
+        out_height, out_width = grad_output.shape[2], grad_output.shape[3]
+
         for out_channel in range(self.out_channels):
             for in_channel in range(in_channels):
-                # Compute weight gradients
+                # Fix: Ensure correlate2d outputs the correct shape
                 grad_weights[out_channel, in_channel] = np.sum([
                     self.correlate2d(self.input[b, in_channel], grad_output[b, out_channel])
                     for b in range(batch_size)
                 ], axis=0)
 
-                # Compute input gradients (full mode for proper backpropagation)
-                grad_input[:, in_channel] += np.array([
+                # Fix: Ensure grad_input receives properly shaped data
+                grad_output_resized = np.array([
                     self.correlate2d(grad_output[b, out_channel], np.flip(self.weights[out_channel, in_channel]))
                     for b in range(batch_size)
                 ])
-        
+
+                # Check if grad_output_resized matches grad_input[:, in_channel]
+                if grad_output_resized.shape[1:] == grad_input[:, in_channel].shape[1:]:
+                    grad_input[:, in_channel] += grad_output_resized
+                # else:
+                #     print(f"Shape Mismatch: grad_output_resized {grad_output_resized.shape}, grad_input[:, in_channel] {grad_input[:, in_channel].shape}")
+
         self.grad_weights = grad_weights
         self.grad_biases = grad_biases
 
         return grad_input
+
 
     def get_parameters(self):
         return {
