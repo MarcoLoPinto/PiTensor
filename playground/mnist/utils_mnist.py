@@ -67,13 +67,16 @@ class ClassificationNetwork:
             # Train epoch:
 
             train_loss = 0.0
-            for i in tqdm(range(num_batches), desc=f"Epoch {epoch + 1}/{epochs}"):
+            epoch_run = tqdm(range(num_batches))
+            for i in epoch_run:
 
                 batch_data = train_data[i*batch_size : (i + 1)*batch_size]
                 batch_labels = train_labels[i*batch_size : (i + 1)*batch_size].astype(np.int64)
 
                 predictions, loss = self.train_step(batch_data, batch_labels, optimizer)
                 train_loss += loss
+
+                epoch_run.set_description(f"Epoch {epoch + 1}/{epochs} [loss = {loss:.4f}]")
 
             train_loss /= num_batches
 

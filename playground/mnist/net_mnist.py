@@ -73,7 +73,7 @@ if __name__ == '__main__':
             batch_size = 64, 
             optimizer = optimizer,
             save_dir_path = CHECKPOINT_DIR_PATH,
-            min_f1_score = 0.95 if approach == 'mlp' else 0.85
+            min_f1_score = 0.95 if approach == 'mlp' else 0.92
         )
 
         num_tests = 10

@@ -97,3 +97,16 @@ class MaxPool2D:
             grad_input = grad_input[:, :, pad_h[0]:-pad_h[1] or None, pad_w[0]:-pad_w[1] or None]
 
         return grad_input
+
+    def get_parameters(self):
+        return {
+            'type': self.__class__.__name__,
+            'pool_size': self.pool_size,
+            'strides': self.strides,
+            'padding': self.padding,
+        }
+    
+    def update_parameters(self, params):
+        self.pool_size = params['pool_size']
+        self.strides = params['strides']
+        self.padding = params['padding']

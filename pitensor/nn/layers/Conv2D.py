@@ -102,11 +102,17 @@ class Conv2D(Layer):
     def get_parameters(self):
         return {
             'type': self.__class__.__name__,
+            'in_channels': self.in_channels,
+            'out_channels': self.out_channels,
+            'kernel_size': self.kernel_size,
             'weights': self.weights,
-            'biases': self.biases
+            'biases': self.biases,
         }
 
     def update_parameters(self, params):
+        self.in_channels = params['in_channels']
+        self.out_channels = params['out_channels']
+        self.kernel_size = params['kernel_size']
         self.weights = params['weights']
         self.biases = params['biases']
 
