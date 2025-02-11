@@ -13,6 +13,8 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         "numpy",
+        "matplotlib",
+        "pandas",
     ],
     python_requires='>=3.8'
 )
