@@ -4,14 +4,14 @@
 
 The `Linear` class implements a **fully connected** (dense) layer in a neural network. This layer applies a **linear transformation** to the input:
 
-```math
+$$
     Y = XW + B
-```
+$$
 
 where:
 
-- $X$ is the input matrix of shape $`(batch \_ size, input \_ dim)`$
-- $W$ is the weight matrix of shape $(input\_dim, output \_ dim)$
+- $X$ is the input matrix of shape $(batch \_ size, input \_ dim)$
+- $W$ is the weight matrix of shape $(input \_ dim, output \_ dim)$
 - $B$ is the bias vector of shape $(output \_ dim,)$
 - $Y$ is the output matrix of shape $(batch \_ size, output \_ dim)$
 
@@ -26,7 +26,7 @@ self.weights = np.random.randn(input_dim, output_dim) * np.sqrt(1. / input_dim)
 self.biases = np.random.randn(output_dim) * np.sqrt(1. / output_dim)
 ```
 
-Uses **Xavier (Glorot) Initialization** to maintain the scale of gradients across layers: the weights are initialized with a normal distribution scaled by $\sqrt{\frac{1}{input\_dim}}$.
+Uses **Xavier (Glorot) Initialization** to maintain the scale of gradients across layers: the weights are initialized with a normal distribution scaled by $\sqrt{\frac{1}{input \_ dim}}$.
 
 In essence, Xavier initialization helps keep the magnitude of the outputs of the neurons similar across all layers and this helps in converging the model faster and prevents exploding and vanishing gradients.
 
@@ -51,10 +51,10 @@ self.grad_weights = np.dot(self.input.T, grad_output)
 
 To compute the gradient $\frac{\partial L}{\partial W}$ in order to be used to update the $W$ weights, we first use the chain rule:
 
-```math
+$$
     \frac{\partial L}{\partial W} = 
     \frac{\partial L}{\partial Y} \cdot \frac{\partial Y}{\partial W}
-```
+$$
 
 we assume that $\frac{\partial L}{\partial Y} = G$ has been computed (from the next layer of the forward pass or from a loss), so:
 
@@ -139,7 +139,7 @@ $$
     \frac{\partial L}{\partial Y} \cdot \frac{\partial Y}{\partial B} = 
     \frac{\partial L}{\partial Y} \cdot \frac{\partial (XW + B)}{\partial B} = 
     \frac{\partial L}{\partial Y} \cdot I = 
-    \sum_{i=1}^{batch\_size} \frac{\partial L}{\partial Y_i} =
+    \sum_{i=1}^{batch \_ size} \frac{\partial L}{\partial Y_i} =
     \sum_{rows} G
 $$
 
