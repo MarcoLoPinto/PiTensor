@@ -10,7 +10,7 @@ $$
 
 where:
 
-- $X$ is the input matrix of shape $(batch \_ size, input \_ dim)$
+- $X$ is the input matrix of shape $`(batch\_size, input\_dim)`$
 - $W$ is the weight matrix of shape $(input \_ dim, output \_ dim)$
 - $B$ is the bias vector of shape $(output \_ dim,)$
 - $Y$ is the output matrix of shape $(batch \_ size, output \_ dim)$
