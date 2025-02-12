@@ -4,16 +4,16 @@
 
 The `Linear` class implements a **fully connected** (dense) layer in a neural network. This layer applies a **linear transformation** to the input:
 
-$$
+```math
     Y = XW + B
-$$
+```
 
 where:
 
-- $X$ is the input matrix of shape $(batch\_size, input\_dim)$
-- $W$ is the weight matrix of shape $(input\_dim, output\_dim)$
-- $B$ is the bias vector of shape $(output\_dim,)$
-- $Y$ is the output matrix of shape $(batch\_size, output\_dim)$
+- $X$ is the input matrix of shape $(batch \_ size, input \_ dim)$
+- $W$ is the weight matrix of shape $(input\_dim, output \_ dim)$
+- $B$ is the bias vector of shape $(output \_ dim,)$
+- $Y$ is the output matrix of shape $(batch \_ size, output \_ dim)$
 
 The layer learns $W$ and $B$ during training through backpropagation, where:
 
