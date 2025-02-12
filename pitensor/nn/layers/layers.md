@@ -11,9 +11,9 @@ $$
 where:
 
 - $X$ is the input matrix of shape $`(batch\_size, input\_dim)`$
-- $W$ is the weight matrix of shape $(input \_ dim, output \_ dim)$
-- $B$ is the bias vector of shape $(output \_ dim,)$
-- $Y$ is the output matrix of shape $(batch \_ size, output \_ dim)$
+- $W$ is the weight matrix of shape $`(input\_dim, output\_dim)`$
+- $B$ is the bias vector of shape $`(output\_dim,)`$
+- $Y$ is the output matrix of shape $`(batch\_size, output\_dim)`$
 
 The layer learns $W$ and $B$ during training through backpropagation, where:
 
@@ -26,7 +26,7 @@ self.weights = np.random.randn(input_dim, output_dim) * np.sqrt(1. / input_dim)
 self.biases = np.random.randn(output_dim) * np.sqrt(1. / output_dim)
 ```
 
-Uses **Xavier (Glorot) Initialization** to maintain the scale of gradients across layers: the weights are initialized with a normal distribution scaled by $\sqrt{\frac{1}{input \_ dim}}$.
+Uses **Xavier (Glorot) Initialization** to maintain the scale of gradients across layers: the weights are initialized with a normal distribution scaled by $`\sqrt{\frac{1}{input\_dim}}`$.
 
 In essence, Xavier initialization helps keep the magnitude of the outputs of the neurons similar across all layers and this helps in converging the model faster and prevents exploding and vanishing gradients.
 
@@ -134,14 +134,14 @@ self.grad_biases = np.sum(grad_output, axis=0)
 
 Computes the gradient $\frac{\partial L}{\partial B}$:
 
-$$ 
+```math
     \frac{\partial L}{\partial B} = 
     \frac{\partial L}{\partial Y} \cdot \frac{\partial Y}{\partial B} = 
     \frac{\partial L}{\partial Y} \cdot \frac{\partial (XW + B)}{\partial B} = 
     \frac{\partial L}{\partial Y} \cdot I = 
-    \sum_{i=1}^{batch \_ size} \frac{\partial L}{\partial Y_i} =
+    \sum_{i=1}^{batch\_size} \frac{\partial L}{\partial Y_i} =
     \sum_{rows} G
-$$
+```
 
 with shape: `(output_dim,)`
 
