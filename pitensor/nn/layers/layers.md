@@ -10,7 +10,7 @@ The `Linear` class implements a **fully connected** (dense) layer in a neural ne
 
 where:
 
-- $X$ is the input matrix of shape $(batch \_ size, input \_ dim)$
+- $X$ is the input matrix of shape $`(batch \_ size, input \_ dim)`$
 - $W$ is the weight matrix of shape $(input\_dim, output \_ dim)$
 - $B$ is the bias vector of shape $(output \_ dim,)$
 - $Y$ is the output matrix of shape $(batch \_ size, output \_ dim)$
@@ -51,10 +51,10 @@ self.grad_weights = np.dot(self.input.T, grad_output)
 
 To compute the gradient $\frac{\partial L}{\partial W}$ in order to be used to update the $W$ weights, we first use the chain rule:
 
-$$
+```math
     \frac{\partial L}{\partial W} = 
     \frac{\partial L}{\partial Y} \cdot \frac{\partial Y}{\partial W}
-$$
+```
 
 we assume that $\frac{\partial L}{\partial Y} = G$ has been computed (from the next layer of the forward pass or from a loss), so:
 
