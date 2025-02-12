@@ -16,7 +16,13 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
     cd pitensor
     ```
 
-2.  Install the repository as a standard package:
+2.  Create a new environment (conda/miniconda is preferred) and activate it for this project:
+    ```sh
+    conda create -n pitensor python=3.9
+    conda activate pitensor
+    ```
+
+3.  Install the repository as a standard package:
     ```sh
     pip install .
     ```

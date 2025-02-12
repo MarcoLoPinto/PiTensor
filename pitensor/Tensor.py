@@ -18,8 +18,10 @@ class Tensor(np.ndarray):
         # self.requires_grad = getattr(obj, "requires_grad", False)
         # self.grad = getattr(obj, "grad", None)
 
-    def __array_wrap__(self, out_arr, context=None):
+    def __array_wrap__(self, out_arr, context=None, return_scalar=False):
         """Ensures all operations return a Tensor."""
+        if return_scalar: # If NumPy expects a scalar, return a Python scalar
+            return out_arr.item()
         return Tensor(out_arr)
     
     def numpy(self):
