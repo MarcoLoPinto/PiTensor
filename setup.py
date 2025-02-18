@@ -15,6 +15,7 @@ setup(
         "numpy",
         "matplotlib",
         "pandas",
+        "tqdm",
     ],
     python_requires='>=3.9'
 )
