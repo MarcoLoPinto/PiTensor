@@ -7,7 +7,7 @@ from tqdm import tqdm
 from typing import Union
 
 # Import the necessary layers, losses, optimizers, and metrics:
-from pitensor.nn.layers import Sequential
+from pitensor.nn.layers import Sequential, Conv2D, Linear, ReLU, MaxPool2D, Softmax, Flatten
 from pitensor.nn.losses import CrossEntropyLoss
 from pitensor.nn.optimizers import Optimizer, SGD
 from pitensor.metrics import precision_score, recall_score, f1_score
@@ -203,5 +203,94 @@ def plot_training_history(csv_path: str, save_path: str = None):
     else:
         plt.show()
     plt.close()
+
+def capture_activations(layers: Sequential, input_sample: np.ndarray):
+    """
+    Runs a forward pass and captures the output after each layer.
+
+    Args:
+        layers (Sequential): Model layers.
+        input_sample (np.ndarray): Input sample or batch.
+
+    Returns:
+        list[tuple[str, np.ndarray]]: (layer_name, activation) pairs.
+    """
+    activations = []
+    current = input_sample
+    for layer in layers:
+        current = layer.forward(current)
+        activations.append((layer.__class__.__name__, current))
+    return activations
+
+def visualize_layer_learning(
+    layers: Sequential,
+    input_sample: np.ndarray,
+    save_dir_path: str,
+    prefix: str = "sample"
+):
+    """
+    Saves visualizations of what each layer is learning.
+
+    For Conv2D: saves a grid of feature maps (first N channels).
+    For Linear: saves a weight heatmap and activation histogram.
+    For other layers: saves activation histogram.
+    """
+    os.makedirs(save_dir_path, exist_ok=True)
+    activations = capture_activations(layers, input_sample)
+
+    for idx, (layer_name, activation) in enumerate(activations):
+        layer = layers[idx]
+        fig_path = os.path.join(save_dir_path, f"{prefix}_layer_{idx}_{layer_name}.png")
+
+        if isinstance(layer, Conv2D):
+            # activation: (batch, channels, height, width)
+            feature_maps = activation[0]
+            num_maps = min(8, feature_maps.shape[0])
+            cols = 4
+            rows = int(np.ceil(num_maps / cols))
+            plt.figure(figsize=(cols * 3, rows * 3))
+            for i in range(num_maps):
+                plt.subplot(rows, cols, i + 1)
+                plt.imshow(feature_maps[i], cmap="gray")
+                plt.title(f"ch {i}")
+                plt.axis("off")
+            plt.suptitle(f"{layer_name} feature maps (sample 0)")
+            plt.tight_layout()
+            plt.savefig(fig_path)
+            plt.close()
+            continue
+
+        if isinstance(layer, Linear):
+            # Weights heatmap
+            plt.figure(figsize=(6, 4))
+            plt.imshow(layer.weights, aspect="auto", cmap="viridis")
+            plt.colorbar(label="Weight value")
+            plt.title(f"{layer_name} weights")
+            plt.xlabel("Output units")
+            plt.ylabel("Input units")
+            plt.tight_layout()
+            plt.savefig(fig_path.replace(".png", "_weights.png"))
+            plt.close()
+
+            # Activation histogram
+            plt.figure(figsize=(6, 4))
+            plt.hist(activation.flatten(), bins=50)
+            plt.title(f"{layer_name} activations")
+            plt.xlabel("Activation value")
+            plt.ylabel("Frequency")
+            plt.tight_layout()
+            plt.savefig(fig_path.replace(".png", "_activations.png"))
+            plt.close()
+            continue
+
+        # Generic activation histogram for other layers
+        plt.figure(figsize=(6, 4))
+        plt.hist(activation.flatten(), bins=50)
+        plt.title(f"{layer_name} activations")
+        plt.xlabel("Activation value")
+        plt.ylabel("Frequency")
+        plt.tight_layout()
+        plt.savefig(fig_path)
+        plt.close()
 
 # endregion

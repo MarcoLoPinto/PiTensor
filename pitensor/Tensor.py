@@ -22,7 +22,7 @@ class Tensor(np.ndarray):
         """Ensures all operations return a Tensor."""
         if return_scalar: # If NumPy expects a scalar, return a Python scalar
             return out_arr.item()
-        return Tensor(out_arr)
+        return np.asarray(out_arr).view(Tensor)
     
     def numpy(self):
         """Explicitly converts Tensor back to a NumPy array."""

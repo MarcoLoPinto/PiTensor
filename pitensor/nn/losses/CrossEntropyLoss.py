@@ -22,10 +22,11 @@ class CrossEntropyLoss:
             raise ValueError("Targets should be a 1D array of size equal to the batch size.")
         if not np.issubdtype(targets.dtype, np.integer):
             raise ValueError("Targets should be an array of integers representing class indices.")
-        self.predictions = predictions
+        clipped_predictions = np.clip(predictions, 1e-8, 1.0)
+        self.predictions = clipped_predictions
         self.targets = targets
         self.batch_size = predictions.shape[0]
-        log_likelihood = -np.log(predictions[range(self.batch_size), targets])
+        log_likelihood = -np.log(clipped_predictions[range(self.batch_size), targets])
         return np.sum(log_likelihood) / self.batch_size
 
     def backward(self) -> np.ndarray:

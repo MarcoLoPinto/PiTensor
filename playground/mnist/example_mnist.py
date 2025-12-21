@@ -13,18 +13,19 @@ from playground.data_loaders.digit_recognizer import load_digit_recognizer
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
 
-from utils_mnist import ClassificationNetwork, plot_grayscale_image, plot_training_history
+from utils_mnist import ClassificationNetwork, plot_grayscale_image, plot_training_history, visualize_layer_learning
 
 if __name__ == '__main__':
     # Variables:
-    approach: Literal['mlp', 'cnn'] = 'cnn'
-    pipeline_phase = 'test'
+    approach: Literal['mlp', 'cnn'] = 'mlp'
+    pipeline_phase = 'train'
 
     ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../')
     DIGIT_RECOGNIZER_DIR = os.path.join(ROOT_DIR, 'data', 'digit-recognizer')
     TRAIN_FILE = os.path.join(DIGIT_RECOGNIZER_DIR, 'train.csv')
     TEST_FILE = os.path.join(DIGIT_RECOGNIZER_DIR, 'test.csv')
     CHECKPOINT_DIR_PATH = os.path.join(ROOT_DIR, 'playground', 'checkpoints', f'{approach}_mnist')
+    VIZ_DIR_PATH = os.path.join(CHECKPOINT_DIR_PATH, 'layer_viz')
 
     # SET THE SEED
     np.random.seed(1746911)
@@ -91,5 +92,11 @@ if __name__ == '__main__':
         num_tests = 10
         test_data_small = test_data[:num_tests]
         preds = net.predict(test_data_small)
+        visualize_layer_learning(
+            layers,
+            test_data_small[:1],
+            save_dir_path=VIZ_DIR_PATH,
+            prefix=f"{approach}_test"
+        )
         for test_i, pred_i in zip(test_data_small, preds):
             plot_grayscale_image(test_i, title=f'pred {pred_i}')

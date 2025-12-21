@@ -69,9 +69,11 @@ class Conv2D(Layer):
         # Fix: Ensure grad_input has the same shape as original input
         grad_input = np.zeros((batch_size, in_channels, height, width))
         grad_weights = np.zeros_like(self.weights)
-        grad_biases = np.sum(grad_output, axis=(0, 2, 3), keepdims=True)
+        grad_biases = np.sum(grad_output, axis=(0, 2, 3), keepdims=False).reshape(self.out_channels, 1, 1)
 
         out_height, out_width = grad_output.shape[2], grad_output.shape[3]
+        pad_h = kernel_height - 1
+        pad_w = kernel_width - 1
 
         for out_channel in range(self.out_channels):
             for in_channel in range(in_channels):
@@ -81,17 +83,17 @@ class Conv2D(Layer):
                     for b in range(batch_size)
                 ], axis=0)
 
-                # Fix: Ensure grad_input receives properly shaped data
-                grad_output_resized = np.array([
-                    self.correlate2d(grad_output[b, out_channel], np.flip(self.weights[out_channel, in_channel]))
-                    for b in range(batch_size)
-                ])
-
-                # Check if grad_output_resized matches grad_input[:, in_channel]
-                if grad_output_resized.shape[1:] == grad_input[:, in_channel].shape[1:]:
-                    grad_input[:, in_channel] += grad_output_resized
-                # else:
-                #     print(f"Shape Mismatch: grad_output_resized {grad_output_resized.shape}, grad_input[:, in_channel] {grad_input[:, in_channel].shape}")
+                # Full convolution via padded grad_output so grad_input matches input shape.
+                for b in range(batch_size):
+                    grad_output_padded = np.pad(
+                        grad_output[b, out_channel],
+                        ((pad_h, pad_h), (pad_w, pad_w)),
+                        mode='constant'
+                    )
+                    grad_input[b, in_channel] += self.correlate2d(
+                        grad_output_padded,
+                        np.flip(self.weights[out_channel, in_channel])
+                    )
 
         self.grad_weights = grad_weights
         self.grad_biases = grad_biases
@@ -144,4 +146,3 @@ class Conv2D(Layer):
         output = np.einsum('ijkl,kl->ij', image_patches, kernel)
 
         return output
-

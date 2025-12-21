@@ -38,8 +38,8 @@ def precision_score(
 
     if average == 'micro':
         TP = np.sum(y_true == y_pred)
-        FP = np.sum((y_true != y_pred) & (y_pred > 0))
-        return TP / (TP + FP) if (TP + FP) > 0 else 0.0
+        total = y_true.size
+        return TP / total if total > 0 else 0.0
 
     if average == 'macro':
         return np.mean(precision_per_class)
@@ -86,8 +86,8 @@ def recall_score(
 
     if average == 'micro':
         TP = np.sum(y_true == y_pred)
-        FN = np.sum((y_true != y_pred) & (y_true > 0))
-        return TP / (TP + FN) if (TP + FN) > 0 else 0.0
+        total = y_true.size
+        return TP / total if total > 0 else 0.0
 
     if average == 'macro':
         return np.mean(recall_per_class)

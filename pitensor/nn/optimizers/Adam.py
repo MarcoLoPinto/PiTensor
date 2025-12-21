@@ -1,6 +1,5 @@
-import numpy as np
 from .Optimizer import Optimizer
-from pitensor.nn.layers import Linear
+import numpy as np
 
 class Adam(Optimizer):
     def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
@@ -14,28 +13,36 @@ class Adam(Optimizer):
 
     def step(self, layers):
         self.t += 1
-        for i, layer in enumerate(layers):
-            if isinstance(layer, Linear):
-                if i not in self.m:
-                    self.m[i] = {'weights': np.zeros_like(layer.weights), 'biases': np.zeros_like(layer.biases)}
-                    self.v[i] = {'weights': np.zeros_like(layer.weights), 'biases': np.zeros_like(layer.biases)}
-                
-                # Update biased first moment estimate
-                self.m[i]['weights'] = self.beta1 * self.m[i]['weights'] + (1 - self.beta1) * layer.grad_weights
-                self.m[i]['biases'] = self.beta1 * self.m[i]['biases'] + (1 - self.beta1) * layer.grad_biases
+        for layer in layers:
+            if not hasattr(layer, "weights") or not hasattr(layer, "grad_weights") or layer.grad_weights is None:
+                continue
 
-                # Update biased second raw moment estimate
-                self.v[i]['weights'] = self.beta2 * self.v[i]['weights'] + (1 - self.beta2) * (layer.grad_weights ** 2)
-                self.v[i]['biases'] = self.beta2 * self.v[i]['biases'] + (1 - self.beta2) * (layer.grad_biases ** 2)
+            layer_key = id(layer)
+            if layer_key not in self.m:
+                self.m[layer_key] = {'weights': np.zeros_like(layer.weights)}
+                self.v[layer_key] = {'weights': np.zeros_like(layer.weights)}
+                if hasattr(layer, "biases"):
+                    self.m[layer_key]['biases'] = np.zeros_like(layer.biases)
+                    self.v[layer_key]['biases'] = np.zeros_like(layer.biases)
 
-                # Compute bias-corrected first moment estimate
-                m_hat_weights = self.m[i]['weights'] / (1 - self.beta1 ** self.t)
-                m_hat_biases = self.m[i]['biases'] / (1 - self.beta1 ** self.t)
+            # Update biased first moment estimate
+            self.m[layer_key]['weights'] = self.beta1 * self.m[layer_key]['weights'] + (1 - self.beta1) * layer.grad_weights
 
-                # Compute bias-corrected second raw moment estimate
-                v_hat_weights = self.v[i]['weights'] / (1 - self.beta2 ** self.t)
-                v_hat_biases = self.v[i]['biases'] / (1 - self.beta2 ** self.t)
+            # Update biased second raw moment estimate
+            self.v[layer_key]['weights'] = self.beta2 * self.v[layer_key]['weights'] + (1 - self.beta2) * (layer.grad_weights ** 2)
 
-                # Update parameters
-                layer.weights -= self.learning_rate * m_hat_weights / (np.sqrt(v_hat_weights) + self.epsilon)
+            # Compute bias-corrected first moment estimate
+            m_hat_weights = self.m[layer_key]['weights'] / (1 - self.beta1 ** self.t)
+
+            # Compute bias-corrected second raw moment estimate
+            v_hat_weights = self.v[layer_key]['weights'] / (1 - self.beta2 ** self.t)
+
+            # Update weights
+            layer.weights -= self.learning_rate * m_hat_weights / (np.sqrt(v_hat_weights) + self.epsilon)
+
+            if hasattr(layer, "biases") and hasattr(layer, "grad_biases") and layer.grad_biases is not None:
+                self.m[layer_key]['biases'] = self.beta1 * self.m[layer_key]['biases'] + (1 - self.beta1) * layer.grad_biases
+                self.v[layer_key]['biases'] = self.beta2 * self.v[layer_key]['biases'] + (1 - self.beta2) * (layer.grad_biases ** 2)
+                m_hat_biases = self.m[layer_key]['biases'] / (1 - self.beta1 ** self.t)
+                v_hat_biases = self.v[layer_key]['biases'] / (1 - self.beta2 ** self.t)
                 layer.biases -= self.learning_rate * m_hat_biases / (np.sqrt(v_hat_biases) + self.epsilon)

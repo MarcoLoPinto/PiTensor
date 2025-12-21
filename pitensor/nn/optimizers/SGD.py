@@ -1,6 +1,4 @@
-import numpy as np
 from .Optimizer import Optimizer
-from pitensor.nn.layers import Linear
 
 class SGD(Optimizer):
     """Implements the Stochastic Gradient Descent (SGD) optimization algorithm.
@@ -22,9 +20,10 @@ class SGD(Optimizer):
             layers (list): A list of layers in the model.
 
         Notes:
-            - Only layers that are instances of the `Linear` class are updated.
+            - Updates any layer exposing weights/biases and their gradients.
         """
         for layer in layers:
-            if isinstance(layer, Linear):
+            if hasattr(layer, "weights") and hasattr(layer, "grad_weights") and layer.grad_weights is not None:
                 layer.weights -= self.learning_rate * layer.grad_weights
+            if hasattr(layer, "biases") and hasattr(layer, "grad_biases") and layer.grad_biases is not None:
                 layer.biases -= self.learning_rate * layer.grad_biases
