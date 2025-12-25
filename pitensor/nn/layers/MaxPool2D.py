@@ -58,7 +58,8 @@ class MaxPool2D:
 
                 window = input[:, :, h_start:h_end, w_start:w_end]
                 max_values = np.max(window, axis=(2, 3), keepdims=True)
-                output[:, :, i, j] = max_values.squeeze()
+                # Avoid squeezing away the channel dimension when channels == 1.
+                output[:, :, i, j] = max_values[:, :, 0, 0]
                 self.max_indices[:, :, h_start:h_end, w_start:w_end] = (window == max_values)
 
         return output

@@ -1,5 +1,7 @@
 ![PiTensor Logo](assets/logo_with_name.png)
 
+[![CI](https://github.com/MarcoLoPinto/PiTensor/actions/workflows/ci.yml/badge.svg)](https://github.com/MarcoLoPinto/PiTensor/actions/workflows/ci.yml)
+
 -------------------------------------------
 
 PiTensor is a Deep Learning library implemented from scratch using NumPy. 
@@ -33,7 +35,7 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
 
 ## Features
 
-- **Layers**: Linear, Convolutional, ReLU, Softmax...
+- **Layers**: Linear, Convolutional, ReLU, MaxPool...
 - **Loss Functions**: CrossEntropyLoss
 - **Optimizers**: SGD, Adam
 - **Metrics**: Precision, Recall, F1-Score

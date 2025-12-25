@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from typing import Literal, Union
 # Import the necessary layers, losses, optimizers, and metrics:
-from pitensor.nn.layers import Conv2D, Flatten, Linear, MaxPool2D, ReLU, Softmax, Sequential
+from pitensor.nn.layers import Conv2D, Flatten, Linear, MaxPool2D, ReLU, Sequential
 from pitensor.nn.losses import CrossEntropyLoss
 from pitensor.nn.optimizers import Optimizer, SGD
 from pitensor.metrics import precision_score, recall_score, f1_score
@@ -17,7 +17,7 @@ from utils_mnist import ClassificationNetwork, plot_grayscale_image, plot_traini
 
 if __name__ == '__main__':
     # Variables:
-    approach: Literal['mlp', 'cnn'] = 'mlp'
+    approach: Literal['mlp', 'cnn'] = 'cnn'
     pipeline_phase = 'train'
 
     ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../')
@@ -39,8 +39,7 @@ if __name__ == '__main__':
         layers = Sequential(
             Linear(784, 128),
             ReLU(),
-            Linear(128, 10),
-            Softmax()
+            Linear(128, 10)
         )
     elif approach == 'cnn':
         layers = Sequential(
@@ -55,8 +54,7 @@ if __name__ == '__main__':
             Flatten(),
             Linear(16 * 5 * 5, 128),
             ReLU(),
-            Linear(128, 10),
-            Softmax()
+            Linear(128, 10)
         )
         train_data = train_data.reshape(-1, 1, 28, 28)
         val_data = val_data.reshape(-1, 1, 28, 28)
