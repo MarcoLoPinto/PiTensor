@@ -18,4 +18,4 @@ jobs:
           pip install numpy
       - name: Run layer checks
         run: |
-          PYTHONPATH=. python playground/tests/layer_checks.py
+          PYTHONPATH=. python tests/layer_checks.py

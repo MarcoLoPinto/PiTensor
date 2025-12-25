@@ -258,6 +258,21 @@ def visualize_layer_learning(
             plt.tight_layout()
             plt.savefig(fig_path)
             plt.close()
+            # Visualize a few learned filters for education
+            weights = layer.weights
+            num_filters = min(8, weights.shape[0])
+            cols = 4
+            rows = int(np.ceil(num_filters / cols))
+            plt.figure(figsize=(cols * 3, rows * 3))
+            for i in range(num_filters):
+                plt.subplot(rows, cols, i + 1)
+                plt.imshow(weights[i, 0], cmap="gray")
+                plt.title(f"f {i}")
+                plt.axis("off")
+            plt.suptitle(f"{layer_name} filters (channel 0)")
+            plt.tight_layout()
+            plt.savefig(fig_path.replace(".png", "_filters.png"))
+            plt.close()
             continue
 
         if isinstance(layer, Linear):
@@ -282,6 +297,17 @@ def visualize_layer_learning(
             plt.savefig(fig_path.replace(".png", "_activations.png"))
             plt.close()
             continue
+
+        if isinstance(layer, MaxPool2D) and hasattr(layer, "max_indices"):
+            # Visualize max mask for the first sample/channel
+            mask = layer.max_indices[0, 0].astype(float)
+            plt.figure(figsize=(4, 4))
+            plt.imshow(mask, cmap="gray")
+            plt.title(f"{layer_name} max mask (sample 0, ch 0)")
+            plt.axis("off")
+            plt.tight_layout()
+            plt.savefig(fig_path.replace(".png", "_mask.png"))
+            plt.close()
 
         # Generic activation histogram for other layers
         plt.figure(figsize=(6, 4))
