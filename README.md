@@ -44,6 +44,14 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
 
 It is important to note that PiTensor (*or, at least, this branch*) deliberately does support only sequential layers (i.e., no skip connections or concatenations). This is because, as previously stated, primary goal is to provide a clean and readable implementation of Deep Learning fundamentals.
 
+## Playground
+
+The `playground` folder contains runnable examples, experiments, and quick tests.
+Start with `playground/mnist/example_mnist.py` for an end-to-end MNIST training example.
+
+Example output (MLP training history):
+![MLP MNIST Training History](playground/checkpoints/mlp_mnist/history.png)
+
 ## Contributing
 
 Contributions to PiTensor are welcome. If there is interest in enhancing this educational Deep Learning framework, follow these steps:

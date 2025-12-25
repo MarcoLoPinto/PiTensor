@@ -17,8 +17,8 @@ from utils_mnist import ClassificationNetwork, plot_grayscale_image, plot_traini
 
 if __name__ == '__main__':
     # Variables:
-    approach: Literal['mlp', 'cnn'] = 'cnn'
-    pipeline_phase = 'train'
+    approach: Literal['mlp', 'cnn'] = 'mlp' # 'mlp' or 'cnn'
+    pipeline_phase = 'train' # 'train' or 'test'
 
     ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../')
     DIGIT_RECOGNIZER_DIR = os.path.join(ROOT_DIR, 'data', 'digit-recognizer')
