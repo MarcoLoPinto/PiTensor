@@ -172,14 +172,75 @@ $$
     G \cdot \frac{\partial XW}{\partial X} = G \cdot W^T
 $$
 
-# TODO
+# Conv2D Layer
 
 ## Overview
 
+The `Conv2D` class implements a 2D convolutional layer using NumPy. The forward pass uses
+**correlation** (no kernel flip), which is the standard "convolution" semantics in most
+deep learning frameworks.
+
+Input shape: `(batch_size, in_channels, height, width)`  
+Output shape: `(batch_size, out_channels, out_height, out_width)`  
+with:
+```
+out_height = height - kernel_size + 1
+out_width  = width  - kernel_size + 1
+```
+
+For a single sample `b`, output channel `o`, and spatial position `(i, j)`:
+
+```
+Y[b, o, i, j] = sum_c sum_u sum_v X[b, c, i+u, j+v] * W[o, c, u, v] + B[o]
+```
+
+where `c` is the input channel index and `(u, v)` spans the kernel size.
+
 ## Initialization
+
+Weights are initialized with a Xavier-like scaling (per input channel):
+
+```python
+self.weights = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * np.sqrt(1. / in_channels)
+self.biases = np.zeros((out_channels, 1, 1))
+```
 
 ## Forward
 
+For each output channel, the layer correlates each input channel with its corresponding
+kernel, sums over channels, and adds a bias per output channel (broadcasted over spatial
+dimensions). The implementation uses `correlate2d` (valid mode) internally.
+
 ## Backward
 
-TODO
+Let `G` be the gradient of the loss w.r.t the output (`grad_output`), with shape
+`(batch_size, out_channels, out_height, out_width)`.
+
+### Gradient of loss w.r.t weights
+
+For each output channel `o` and input channel `c`:
+
+```
+dW[o, c] = sum_b correlate2d(X[b, c], G[b, o])
+```
+
+Resulting shape: `(out_channels, in_channels, kernel_size, kernel_size)`.
+
+### Gradient of loss w.r.t biases
+
+```
+dB[o] = sum_b sum_i sum_j G[b, o, i, j]
+```
+
+Stored as shape `(out_channels, 1, 1)` for broadcasting.
+
+### Gradient of loss w.r.t input
+
+To recover the original input shape, `G` is padded and correlated with the **flipped**
+kernel:
+
+```
+dX[b, c] = sum_o correlate2d(pad(G[b, o]), flip(W[o, c]))
+```
+
+This produces `dX` with shape `(batch_size, in_channels, height, width)`.
