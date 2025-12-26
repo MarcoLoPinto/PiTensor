@@ -55,6 +55,9 @@ Training example (MLP training history):
 Training example (CNN training history):
 ![CNN MNIST Training History](playground/checkpoints/cnn_mnist/history.png)
 
+If you want to play with the models, there is a MNIST whiteboard inference demo in `playground/mnist/whiteboard_predict.py`:
+![MNIST Whiteboard Inference](assets/app_mnist_inference.png)
+
 ## Contributing
 
 Contributions to PiTensor are welcome. If there is interest in enhancing this educational Deep Learning framework, follow these steps:
