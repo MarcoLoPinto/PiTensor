@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
-from typing import Union
+from typing import Literal, Union
 
 # Import the necessary layers, losses, optimizers, and metrics:
 from pitensor.nn.layers import Sequential, Conv2D, Linear, ReLU, MaxPool2D, Softmax, Flatten
@@ -15,6 +15,34 @@ from pitensor.metrics import precision_score, recall_score, f1_score
 from playground.data_loaders.digit_recognizer import load_digit_recognizer
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
+
+
+
+def build_mnist_layers(approach: Literal["mlp", "cnn"]) -> Sequential:
+    """Builds the MLP or CNN architecture used for MNIST examples."""
+    if approach == "mlp":
+        return Sequential(
+            Linear(784, 128),
+            ReLU(),
+            Linear(128, 10),
+        )
+    if approach == "cnn":
+        return Sequential(
+            Conv2D(1, 8, 3),
+            ReLU(),
+            MaxPool2D(pool_size=(2, 2)),
+
+            Conv2D(8, 16, 3),
+            ReLU(),
+            MaxPool2D(pool_size=(2, 2)),
+
+            Flatten(),
+            Linear(16 * 5 * 5, 128),
+            ReLU(),
+            Linear(128, 10),
+        )
+    raise ValueError(f"Invalid approach: {approach}")
+
 
 class ClassificationNetwork:
     """A simple sequential neural network for classification tasks.

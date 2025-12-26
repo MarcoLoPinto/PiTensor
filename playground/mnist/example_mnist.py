@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from typing import Literal, Union
 # Import the necessary layers, losses, optimizers, and metrics:
-from pitensor.nn.layers import Conv2D, Flatten, Linear, MaxPool2D, ReLU, Sequential
 from pitensor.nn.losses import CrossEntropyLoss
 from pitensor.nn.optimizers import Optimizer, SGD
 from pitensor.metrics import precision_score, recall_score, f1_score
@@ -13,7 +12,13 @@ from playground.data_loaders.digit_recognizer import load_digit_recognizer
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
 
-from utils_mnist import ClassificationNetwork, plot_grayscale_image, plot_training_history, visualize_layer_learning
+from utils_mnist import (
+    ClassificationNetwork,
+    build_mnist_layers,
+    plot_grayscale_image,
+    plot_training_history,
+    visualize_layer_learning,
+)
 
 if __name__ == '__main__':
     # Variables:
@@ -35,32 +40,11 @@ if __name__ == '__main__':
         TRAIN_FILE, TEST_FILE, train_val_percentage_split = 0.8
     )
 
-    if approach == 'mlp':
-        layers = Sequential(
-            Linear(784, 128),
-            ReLU(),
-            Linear(128, 10)
-        )
-    elif approach == 'cnn':
-        layers = Sequential(
-            Conv2D(1, 8, 3),
-            ReLU(),
-            MaxPool2D(pool_size=(2, 2)),
-
-            Conv2D(8, 16, 3),
-            ReLU(),
-            MaxPool2D(pool_size=(2, 2)),
-
-            Flatten(),
-            Linear(16 * 5 * 5, 128),
-            ReLU(),
-            Linear(128, 10)
-        )
+    layers = build_mnist_layers(approach)
+    if approach == 'cnn':
         train_data = train_data.reshape(-1, 1, 28, 28)
         val_data = val_data.reshape(-1, 1, 28, 28)
         test_data = test_data.reshape(-1, 1, 28, 28)
-    else:
-        raise ValueError(f'Invalid approach: {approach}')
 
     if pipeline_phase == 'train':
         net = ClassificationNetwork(layers)
