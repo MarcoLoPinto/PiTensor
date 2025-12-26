@@ -49,8 +49,11 @@ It is important to note that PiTensor (*or, at least, this branch*) deliberately
 The `playground` folder contains runnable examples, experiments, and quick tests.
 Start with `playground/mnist/example_mnist.py` for an end-to-end MNIST training example.
 
-Example output (MLP training history):
+Training example (MLP training history):
 ![MLP MNIST Training History](playground/checkpoints/mlp_mnist/history.png)
+
+Training example (CNN training history):
+![CNN MNIST Training History](playground/checkpoints/cnn_mnist/history.png)
 
 ## Contributing
 
