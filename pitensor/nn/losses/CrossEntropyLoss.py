@@ -1,6 +1,8 @@
 import numpy as np
 
-class CrossEntropyLoss:
+from .Loss import Loss
+
+class CrossEntropyLoss(Loss):
     """Computes the softmax cross-entropy loss and its gradient for multi-class classification.
     """
     def forward(self, logits: np.ndarray, targets: np.ndarray) -> float:

@@ -1,3 +1,4 @@
+from .Loss import Loss
 from .CrossEntropyLoss import CrossEntropyLoss
 
 import sys, inspect
@@ -9,5 +10,6 @@ for name, obj in inspect.getmembers(_current_module):
         obj.__module__ = _current_module.__name__  # Dynamically update the module name
 
 __all__ = [
+    "Loss",
     "CrossEntropyLoss", 
 ]
