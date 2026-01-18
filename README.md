@@ -38,6 +38,7 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
 - **Layers**: Linear, Convolutional, ReLU, MaxPool...
 - **Loss Functions**: CrossEntropyLoss
 - **Optimizers**: SGD, Adam
+- **Models**: SequentialModel, LeNet
 - **Metrics**: Precision, Recall, F1-Score
 - **Data Loaders**: MNIST Digit Recognizer dataset
 - **Training and Evaluation**: Training loop, validation, and metric evaluation.
