@@ -45,6 +45,57 @@ This project is inspired by popular Deep Learning frameworks like PyTorch and Te
 
 It is important to note that PiTensor (*or, at least, this branch*) deliberately does support only sequential layers (i.e., no skip connections or concatenations). This is because, as previously stated, primary goal is to provide a clean and readable implementation of Deep Learning fundamentals.
 
+## Quick Examples
+
+### Tensor basics
+
+```python
+import pitensor as pt
+
+x = pt.Tensor([
+    [1, 2, 3], 
+    [4, 5, 6]
+])
+w = pt.Tensor([
+    [1], 
+    [0], 
+    [-1]
+])
+
+y = x @ w
+print(y) # shape: (2, 1)
+
+probs = pt.Tensor.exp(y) / pt.Tensor.exp(y).sum()
+print(probs)
+```
+
+### A tiny model
+
+```python
+from pitensor.nn.layers import Sequential, Linear, ReLU
+from pitensor.nn.losses import CrossEntropyLoss
+from pitensor.nn.optimizers import SGD
+import pitensor as pt
+
+model = Sequential(
+    Linear(4, 8),
+    ReLU(),
+    Linear(8, 3),
+)
+
+x = pt.Tensor([[0.2, -1.1, 0.3, 0.7]])
+targets = pt.Tensor([2], dtype=pt.Tensor.int64)
+
+loss_fn = CrossEntropyLoss()
+logits = model.forward(x)
+loss = loss_fn.forward(logits, targets)
+
+model.backward(loss_fn.backward())
+SGD(learning_rate=0.01).step(model)
+
+print("loss:", loss)
+```
+
 ## Playground
 
 The `playground` folder contains runnable examples, experiments, and quick tests.
