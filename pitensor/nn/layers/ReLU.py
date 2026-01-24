@@ -1,36 +1,37 @@
-import numpy as np
+from pitensor.Tensor import Tensor
+
 from .Layer import Layer
 
 class ReLU(Layer):
     """Implements the Rectified Linear Unit (ReLU) activation function.
     """
-    def forward(self, input):
+    def forward(self, input: Tensor) -> Tensor:
         """
         Computes the forward pass of the ReLU activation function.
 
         Args:
-            input (np.ndarray): Input array of any shape.
+            input (Tensor): Input array of any shape.
 
         Returns:
-            np.ndarray: Output array where each element is the maximum of 0 and the corresponding input value.
+            Tensor: Output array where each element is the maximum of 0 and the corresponding input value.
 
         Notes:
             - ReLU outputs zero for all negative input values and keeps positive values unchanged.
         """
         self.input = input
         # The ReLU activation, outputs zero where input is less than zero
-        return np.maximum(0, input)
+        return input * (input > 0)
 
-    def backward(self, grad_output):
+    def backward(self, grad_output: Tensor) -> Tensor:
         """
         Computes the backward pass of the ReLU activation function.
 
         Args:
-            grad_output (np.ndarray): Gradient of the loss with respect to the output of ReLU, 
+            grad_output (Tensor): Gradient of the loss with respect to the output of ReLU, 
                                       of the same shape as the input.
 
         Returns:
-            np.ndarray: Gradient of the loss with respect to the input of ReLU, 
+            Tensor: Gradient of the loss with respect to the input of ReLU, 
                         of the same shape as the input.
 
         Notes:

@@ -2,10 +2,11 @@ from pitensor.nn.layers import Softmax
 
 import torch
 
-import numpy as np
 import pandas as pd
 
-np.random.seed(42)
+from pitensor.Tensor import Tensor
+
+Tensor.random.seed(42)
 
 # ---- PyTorch Implementation ----
 
@@ -28,20 +29,20 @@ grad_autograd_torch = x_torch.grad.clone()
 # Create an instance of the NumPy-based softmax
 softmax_numpy = Softmax()
 
-# Convert torch tensor to numpy array
-x_numpy = x_torch.detach().numpy()
-grad_output_numpy = grad_output_torch.numpy()
+# Convert torch tensor to Tensor
+x_tensor = Tensor(x_torch.detach().cpu().tolist())
+grad_output_tensor = Tensor(grad_output_torch.detach().cpu().tolist())
 
-# Forward pass in NumPy
-s_numpy = softmax_numpy.forward(x_numpy)
+# Forward pass in Tensor
+s_tensor = softmax_numpy.forward(x_tensor)
 
-# Backward pass in NumPy
-grad_input_numpy = softmax_numpy.backward(grad_output_numpy)
+# Backward pass in Tensor
+grad_input_tensor = softmax_numpy.backward(grad_output_tensor)
 
 # Display results
 df_comparison = pd.DataFrame({
     "Torch Autograd": grad_autograd_torch.numpy().flatten(),
-    "NumPy Manual": grad_input_numpy.flatten()
+    "Tensor Manual": grad_input_tensor.flatten()
 })
 
 print(df_comparison)

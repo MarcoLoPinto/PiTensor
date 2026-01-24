@@ -1,4 +1,4 @@
-import numpy as np
+from pitensor.Tensor import Tensor
 
 class MaxPool2D:
     """2D Max Pooling Layer."""
@@ -19,7 +19,7 @@ class MaxPool2D:
         if self.padding not in {'valid', 'same'}:
             raise ValueError("Padding must be 'valid' or 'same'.")
 
-    def _pad_input(self, input):
+    def _pad_input(self, input: Tensor) -> Tensor:
         self.pad_h = (0, 0)
         self.pad_w = (0, 0)
         if self.padding == 'same':
@@ -27,10 +27,10 @@ class MaxPool2D:
             pad_w = max((input.shape[3] - 1) // self.strides[1] * self.strides[1] + self.pool_size[1] - input.shape[3], 0)
             self.pad_h = (pad_h // 2, pad_h - pad_h // 2)
             self.pad_w = (pad_w // 2, pad_w - pad_w // 2)
-            pad_value = -np.inf
-            if np.issubdtype(input.dtype, np.integer):
-                pad_value = np.iinfo(input.dtype).min
-            input = np.pad(
+            pad_value = -Tensor.inf
+            if Tensor.issubdtype(input.dtype, Tensor.integer):
+                pad_value = Tensor.iinfo(input.dtype).min
+            input = Tensor.pad(
                 input,
                 ((0, 0), (0, 0), self.pad_h, self.pad_w),
                 mode='constant',
@@ -38,15 +38,15 @@ class MaxPool2D:
             )
         return input
 
-    def forward(self, input):
+    def forward(self, input: Tensor) -> Tensor:
         """
         Forward pass for MaxPooling2D.
 
         Args:
-            input (np.ndarray): Input tensor of shape (batch_size, channels, height, width).
+            input (Tensor): Input tensor of shape (batch_size, channels, height, width).
 
         Returns:
-            np.ndarray: Pooled output of shape (batch_size, channels, out_height, out_width).
+            Tensor: Pooled output of shape (batch_size, channels, out_height, out_width).
         """
         self.input_shape = input.shape
         input = self._pad_input(input)
@@ -58,8 +58,8 @@ class MaxPool2D:
         out_height = (height - pool_height) // stride_height + 1
         out_width = (width - pool_width) // stride_width + 1
 
-        output = np.zeros((batch_size, channels, out_height, out_width))
-        self.max_indices = np.zeros((batch_size, channels, out_height, out_width), dtype=np.int64)
+        output = Tensor.zeros((batch_size, channels, out_height, out_width))
+        self.max_indices = Tensor.zeros((batch_size, channels, out_height, out_width), dtype=Tensor.int64)
 
         for i in range(out_height):
             for j in range(out_width):
@@ -70,24 +70,24 @@ class MaxPool2D:
 
                 window = input[:, :, h_start:h_end, w_start:w_end]
                 window_reshaped = window.reshape(batch_size, channels, -1)
-                max_indices = np.argmax(window_reshaped, axis=2)
-                max_values = np.take_along_axis(window_reshaped, max_indices[:, :, None], axis=2)
+                max_indices = window_reshaped.argmax(axis=2)
+                max_values = Tensor.take_along_axis(window_reshaped, max_indices[:, :, None], axis=2)
                 output[:, :, i, j] = max_values[:, :, 0]
                 self.max_indices[:, :, i, j] = max_indices
 
         return output
 
-    def backward(self, grad_output):
+    def backward(self, grad_output: Tensor) -> Tensor:
         """
         Backward pass for MaxPooling2D.
 
         Args:
-            grad_output (np.ndarray): Gradient of loss w.r.t pooled output (batch_size, channels, out_height, out_width).
+            grad_output (Tensor): Gradient of loss w.r.t pooled output (batch_size, channels, out_height, out_width).
 
         Returns:
-            np.ndarray: Gradient of loss w.r.t input (same shape as input).
+            Tensor: Gradient of loss w.r.t input (same shape as input).
         """
-        grad_input = np.zeros(self.padded_shape, dtype=grad_output.dtype)
+        grad_input = Tensor.zeros(self.padded_shape, dtype=grad_output.dtype)
         out_height, out_width = grad_output.shape[2], grad_output.shape[3]
         pool_height, pool_width = self.pool_size
         stride_height, stride_width = self.strides
@@ -103,7 +103,9 @@ class MaxPool2D:
                 w_idx = flat_index % pool_width
                 for b in range(grad_output.shape[0]):
                     for c in range(grad_output.shape[1]):
-                        grad_input[b, c, h_start + h_idx[b, c], w_start + w_idx[b, c]] += grad_output[b, c, i, j]
+                        h = int(h_idx[b, c])
+                        w = int(w_idx[b, c])
+                        grad_input[b, c, h_start + h, w_start + w] += grad_output[b, c, i, j]
 
         if self.padding == 'same':
             grad_input = grad_input[:, :, self.pad_h[0]:-self.pad_h[1] or None, self.pad_w[0]:-self.pad_w[1] or None]

@@ -22,8 +22,8 @@ The layer learns $W$ and $B$ during training through backpropagation, where:
 ## Initialization
 
 ```python
-self.weights = np.random.randn(input_dim, output_dim) * np.sqrt(1. / input_dim)
-self.biases = np.random.randn(output_dim) * np.sqrt(1. / output_dim)
+self.weights = Tensor.random.randn(input_dim, output_dim) * Tensor.sqrt(1. / input_dim)
+self.biases = Tensor.random.randn(output_dim) * Tensor.sqrt(1. / output_dim)
 ```
 
 Uses **Xavier (Glorot) Initialization** to maintain the scale of gradients across layers: the weights are initialized with a normal distribution scaled by $`\sqrt{\frac{1}{input\_dim}}`$.
@@ -34,7 +34,7 @@ In essence, Xavier initialization helps keep the magnitude of the outputs of the
 
 ```python
 self.input = input # Store input for backward pass
-return np.dot(input, self.weights) + self.biases
+return input @ self.weights + self.biases
 ```
 
 - Computes the matrix multiplication $XW$
@@ -46,7 +46,7 @@ return np.dot(input, self.weights) + self.biases
 ### Gradient of loss w.r.t weights
 
 ```python
-self.grad_weights = np.dot(self.input.T, grad_output)
+self.grad_weights = self.input.T @ grad_output
 ```
 
 To compute the gradient $\frac{\partial L}{\partial W}$ in order to be used to update the $W$ weights, we first use the chain rule:
@@ -129,7 +129,7 @@ $$
 ### Gradient of loss w.r.t biases
 
 ```python
-self.grad_biases = np.sum(grad_output, axis=0)
+self.grad_biases = grad_output.sum(axis=0)
 ```
 
 Computes the gradient $\frac{\partial L}{\partial B}$:
@@ -148,7 +148,7 @@ with shape: `(output_dim,)`
 ### Gradient of loss w.r.t input
 
 ```python
-grad_input = np.dot(grad_output, self.weights.T)
+grad_input = grad_output @ self.weights.T
 ```
 
 Computes the gradient of the loss with respect to the input $X$:
@@ -201,8 +201,8 @@ where `c` is the input channel index and `(u, v)` spans the kernel size.
 Weights are initialized with a Xavier-like scaling (per input channel):
 
 ```python
-self.weights = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * np.sqrt(1. / in_channels)
-self.biases = np.zeros((out_channels, 1, 1))
+self.weights = Tensor.random.randn(out_channels, in_channels, kernel_size, kernel_size) * Tensor.sqrt(1. / in_channels)
+self.biases = Tensor.zeros((out_channels, 1, 1))
 ```
 
 ## Forward

@@ -1,13 +1,14 @@
-import numpy as np
+from pitensor.Tensor import Tensor
+
 from .Layer import Layer
 
 class Flatten(Layer):
     """Flattens the input tensor from (batch, channels, height, width) to (batch, features)."""
-    def forward(self, input):
+    def forward(self, input: Tensor) -> Tensor:
         self.input_shape = input.shape  # Save shape for backward pass
         return input.reshape(input.shape[0], -1)
 
-    def backward(self, grad_output):
+    def backward(self, grad_output: Tensor) -> Tensor:
         return grad_output.reshape(self.input_shape)
     
     def get_parameters(self):

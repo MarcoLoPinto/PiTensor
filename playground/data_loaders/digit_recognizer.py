@@ -1,5 +1,6 @@
 import pandas as pd
-import numpy as np
+
+from pitensor.Tensor import Tensor
 
 def load_digit_recognizer(train_csv_path, test_csv_path, train_val_percentage_split = 0.8):
     """
@@ -13,11 +14,11 @@ def load_digit_recognizer(train_csv_path, test_csv_path, train_val_percentage_sp
 
     Returns:
         A tuple containing:
-        - train_data (np.ndarray): Training set features, normalized to the range [0, 1].
-        - train_labels (np.ndarray): Labels corresponding to the training set.
-        - val_data (np.ndarray): Validation set features, normalized to the range [0, 1].
-        - val_labels (np.ndarray): Labels corresponding to the validation set.
-        - test_data (np.ndarray): Test set features, normalized to the range [0, 1].
+        - train_data (Tensor): Training set features, normalized to the range [0, 1].
+        - train_labels (Tensor): Labels corresponding to the training set.
+        - val_data (Tensor): Validation set features, normalized to the range [0, 1].
+        - val_labels (Tensor): Labels corresponding to the validation set.
+        - test_data (Tensor): Test set features, normalized to the range [0, 1].
 
     Notes:
         - The training data is shuffled before splitting into training and validation sets.
@@ -27,12 +28,12 @@ def load_digit_recognizer(train_csv_path, test_csv_path, train_val_percentage_sp
     # read each file with pandas
     data_df = pd.read_csv(train_csv_path)
     test_df = pd.read_csv(test_csv_path)
-    # convert the dataframe to numpy arrays
-    data_np = np.array(data_df, dtype=float)
-    test_np = np.array(test_df, dtype=float)
+    # convert the dataframe to arrays
+    data_np = Tensor.array(data_df, dtype=float)
+    test_np = Tensor.array(test_df, dtype=float)
     m, n = data_np.shape
     # shuffling the data before splitting into train and validation sets
-    np.random.shuffle(data_np)
+    Tensor.random.shuffle(data_np)
     # normalizing from 0-255 to 0-1 range only the inputs and not the labels
     data_np[:, 1:] = data_np[:, 1:] / 255.0
     test_np = test_np / 255.0

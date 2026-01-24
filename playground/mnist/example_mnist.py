@@ -1,6 +1,5 @@
 import os, sys, csv
 from collections import defaultdict
-import numpy as np
 import pandas as pd
 from typing import Literal, Union
 # Import the necessary layers, losses, optimizers, and metrics:
@@ -12,6 +11,7 @@ from playground.data_loaders.digit_recognizer import load_digit_recognizer
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
 
+from pitensor.Tensor import Tensor
 from utils_mnist import (
     ClassificationNetwork,
     build_mnist_layers,
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     VIZ_DIR_PATH = os.path.join(CHECKPOINT_DIR_PATH, 'layer_viz')
 
     # SET THE SEED
-    np.random.seed(1746911)
+    Tensor.random.seed(1746911)
 
     # Load the MNIST dataset
     train_data, train_labels, val_data, val_labels, test_data = load_digit_recognizer(

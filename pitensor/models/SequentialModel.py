@@ -1,7 +1,6 @@
 from typing import Any, Dict, Optional
 
-import numpy as np
-
+from pitensor.Tensor import Tensor
 from pitensor.nn.layers import Sequential
 from pitensor.nn.losses import Loss
 from pitensor.nn.optimizers import Optimizer
@@ -14,15 +13,15 @@ class SequentialModel:
         self.layers = layers
         self.loss = loss
 
-    def forward(self, inputs: np.ndarray) -> np.ndarray:
+    def forward(self, inputs: Tensor) -> Tensor:
         return self.layers.forward(inputs)
 
-    def compute_loss(self, predictions: np.ndarray, targets: np.ndarray) -> float:
+    def compute_loss(self, predictions: Tensor, targets: Tensor) -> float:
         if self.loss is None:
             raise ValueError("Loss is not set for this model.")
         return self.loss.forward(predictions, targets)
 
-    def backward(self) -> np.ndarray:
+    def backward(self) -> Tensor:
         if self.loss is None:
             raise ValueError("Loss is not set for this model.")
         grad = self.loss.backward()
@@ -30,8 +29,8 @@ class SequentialModel:
 
     def train_step(
         self,
-        inputs: np.ndarray,
-        targets: Optional[np.ndarray] = None,
+        inputs: Tensor,
+        targets: Optional[Tensor] = None,
         optimizer: Optional[Optimizer] = None,
     ):
         predictions = self.forward(inputs)
@@ -43,7 +42,7 @@ class SequentialModel:
             optimizer.step(self.layers)
         return predictions, loss
 
-    def predict(self, inputs: np.ndarray) -> np.ndarray:
+    def predict(self, inputs: Tensor) -> Tensor:
         return self.forward(inputs)
 
     def get_parameters(self) -> Dict[str, Any]:
@@ -56,8 +55,8 @@ class SequentialModel:
             self.layers.update_parameters(params["layers"])
 
     def save_parameters(self, file_path: str) -> None:
-        np.save(file_path, self.get_parameters(), allow_pickle=True)
+        Tensor.save(file_path, self.get_parameters(), allow_pickle=True)
 
     def load_parameters(self, file_path: str) -> None:
-        params = np.load(file_path, allow_pickle=True).item()
+        params = Tensor.load(file_path, allow_pickle=True).item()
         self.update_parameters(params)

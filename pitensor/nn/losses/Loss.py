@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 
-import numpy as np
+from pitensor.Tensor import Tensor
 
 
 class Loss(ABC):
     """Abstract base class for all losses."""
 
     @abstractmethod
-    def forward(self, logits: np.ndarray, targets: np.ndarray) -> float:
+    def forward(self, logits: Tensor, targets: Tensor) -> float:
         """Computes the loss value for a batch."""
 
     @abstractmethod
-    def backward(self) -> np.ndarray:
+    def backward(self) -> Tensor:
         """Computes the gradient of the loss with respect to inputs."""

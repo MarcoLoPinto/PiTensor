@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
-import numpy as np
+from pitensor.Tensor import Tensor
+
 from .Layer import Layer
 
 class Conv2D(Layer):
@@ -22,7 +23,7 @@ class Conv2D(Layer):
             kernel_size (int): Size of the square kernel.
             stride (int or tuple): Stride for the convolution.
             padding (int or tuple): Padding for height/width.
-            padding_mode (str): Padding mode passed to np.pad ("zeros" is an alias for "constant").
+            padding_mode (str): Padding mode passed to Tensor.pad ("zeros" is an alias for "constant").
         """
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -32,18 +33,18 @@ class Conv2D(Layer):
         self.padding_mode = padding_mode
 
         # Xavier Initialization for stability
-        self.weights = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * np.sqrt(1. / in_channels)
-        self.biases = np.zeros((out_channels, 1, 1)) # Shape: (out_channels, 1, 1) for broadcasting
+        self.weights = Tensor.random.randn(out_channels, in_channels, kernel_size, kernel_size) * Tensor.sqrt(1. / in_channels)
+        self.biases = Tensor.zeros((out_channels, 1, 1)) # Shape: (out_channels, 1, 1) for broadcasting
 
-    def forward(self, input: np.ndarray) -> np.ndarray:
+    def forward(self, input: Tensor) -> Tensor:
         """
         Performs the forward pass (convolution).
 
         Args:
-            input (np.ndarray): Shape (batch_size, in_channels, height, width)
+            input (Tensor): Shape (batch_size, in_channels, height, width)
 
         Returns:
-            np.ndarray: Output feature map of shape (batch_size, out_channels, out_height, out_width)
+            Tensor: Output feature map of shape (batch_size, out_channels, out_height, out_width)
         """
         self.input = input  # Save for backprop
         batch_size, in_channels, height, width = input.shape
@@ -51,7 +52,7 @@ class Conv2D(Layer):
         pad_h, pad_w = self._normalize_pair(self.padding)
 
         if pad_h > 0 or pad_w > 0:
-            input_padded = np.pad(
+            input_padded = Tensor.pad(
                 input,
                 ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
                 mode=self._normalize_padding_mode(self.padding_mode)
@@ -66,13 +67,13 @@ class Conv2D(Layer):
         out_width = (padded_width - self.kernel_size) // stride_w + 1
 
         # Initialize output feature maps
-        output = np.zeros((batch_size, self.out_channels, out_height, out_width))
+        output = Tensor.zeros((batch_size, self.out_channels, out_height, out_width))
 
         # Perform convolution for each output channel
         for out_channel in range(self.out_channels):
             for in_channel in range(in_channels):
                 # Convolve each input channel with its corresponding weight
-                output[:, out_channel] += np.array([
+                output[:, out_channel] += Tensor.array([
                     self.correlate2d(
                         input_padded[b, in_channel],
                         self.weights[out_channel, in_channel],
@@ -86,15 +87,15 @@ class Conv2D(Layer):
 
         return output
 
-    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+    def backward(self, grad_output: Tensor) -> Tensor:
         """
         Computes gradients for backpropagation.
 
         Args:
-            grad_output (np.ndarray): Gradient of loss w.r.t output (batch_size, out_channels, out_height, out_width)
+            grad_output (Tensor): Gradient of loss w.r.t output (batch_size, out_channels, out_height, out_width)
 
         Returns:
-            np.ndarray: Gradient of loss w.r.t input (same shape as input).
+            Tensor: Gradient of loss w.r.t input (same shape as input).
         """
         batch_size, in_channels, height, width = self.input.shape
         _, _, kernel_height, kernel_width = self.weights.shape
@@ -102,7 +103,7 @@ class Conv2D(Layer):
         pad_h, pad_w = self._normalize_pair(self.padding)
 
         if pad_h > 0 or pad_w > 0:
-            input_padded = np.pad(
+            input_padded = Tensor.pad(
                 self.input,
                 ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w)),
                 mode=self._normalize_padding_mode(self.padding_mode)
@@ -113,9 +114,9 @@ class Conv2D(Layer):
         padded_height, padded_width = input_padded.shape[2], input_padded.shape[3]
 
         # Gradients are computed on the padded input, then unpadded.
-        grad_input_padded = np.zeros((batch_size, in_channels, padded_height, padded_width))
-        grad_weights = np.zeros_like(self.weights)
-        grad_biases = np.sum(grad_output, axis=(0, 2, 3), keepdims=False).reshape(self.out_channels, 1, 1)
+        grad_input_padded = Tensor.zeros((batch_size, in_channels, padded_height, padded_width))
+        grad_weights = Tensor.zeros_like(self.weights)
+        grad_biases = grad_output.sum(axis=(0, 2, 3), keepdims=False).reshape(self.out_channels, 1, 1)
 
         out_height, out_width = grad_output.shape[2], grad_output.shape[3]
 
@@ -168,23 +169,23 @@ class Conv2D(Layer):
 
     def correlate2d(
         self,
-        image: np.ndarray,
-        kernel: np.ndarray,
+        image: Tensor,
+        kernel: Tensor,
         stride: Union[int, Tuple[int, int]] = (1, 1),
-    ) -> np.ndarray:
+    ) -> Tensor:
         """
-        Performs 2D correlation (valid mode) using only NumPy.
+        Performs 2D correlation (valid mode) using Tensor helpers.
 
         The output size is:
         - out_weight = in_weight - kernel_weight + 1
         - out_height = in_height - kernel_height + 1
         
         Args:
-            image (np.ndarray): Input 2D array (H, W).
-            kernel (np.ndarray): Filter/kernel 2D array (kH, kW).
-        
+            image (Tensor): Input 2D array (H, W).
+            kernel (Tensor): Filter/kernel 2D array (kH, kW).
+
         Returns:
-            np.ndarray: Output feature map after correlation.
+            Tensor: Output feature map after correlation.
         """
         stride_h, stride_w = self._normalize_pair(stride)
         H, W = image.shape
@@ -195,10 +196,10 @@ class Conv2D(Layer):
         # Extract sliding window patches from the image
         shape = (outH, outW, kH, kW)
         strides = (image.strides[0] * stride_h, image.strides[1] * stride_w, image.strides[0], image.strides[1])
-        image_patches = np.lib.stride_tricks.as_strided(image, shape=shape, strides=strides)
+        image_patches = Tensor.as_strided(image, shape=shape, strides=strides)
 
         # Perform element-wise multiplication and sum across kernel dimensions
-        output = np.einsum('ijkl,kl->ij', image_patches, kernel)
+        output = Tensor.einsum('ijkl,kl->ij', image_patches, kernel)
 
         return output
 

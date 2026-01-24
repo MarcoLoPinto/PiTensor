@@ -1,4 +1,4 @@
-import numpy as np
+from pitensor.Tensor import Tensor
 from .Layer import Layer
 from typing import Dict, Any, Iterator
 
@@ -27,29 +27,29 @@ class Sequential(Layer):
         """Returns the number of layers."""
         return len(self.layers)
 
-    def forward(self, input) -> np.ndarray:
+    def forward(self, input: Tensor) -> Tensor:
         """
         Performs the forward pass through all layers in sequence.
 
         Args:
-            input (np.ndarray): The input data.
+            input (Tensor): The input data.
 
         Returns:
-            np.ndarray: The final output after passing through all layers.
+            Tensor: The final output after passing through all layers.
         """
         for layer in self.layers:
             input = layer.forward(input)
         return input
 
-    def backward(self, grad_output) -> np.ndarray:
+    def backward(self, grad_output: Tensor) -> Tensor:
         """
         Performs the backward pass through all layers in reverse order.
 
         Args:
-            grad_output (np.ndarray): The gradient of the loss with respect to the output.
+            grad_output (Tensor): The gradient of the loss with respect to the output.
 
         Returns:
-            np.ndarray: The gradient of the loss with respect to the input.
+            Tensor: The gradient of the loss with respect to the input.
         """
         for layer in reversed(self.layers):
             grad_output = layer.backward(grad_output)

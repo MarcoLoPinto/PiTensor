@@ -1,5 +1,4 @@
 import pitensor as pt
-import numpy as np
 from pitensor.nn.layers import Linear
 
 pi_tensor = pt.Tensor([
@@ -7,7 +6,7 @@ pi_tensor = pt.Tensor([
     [4, 5, 6],
 ])
 
-np_array = np.array([
+np_array = pt.Tensor.array([
     [1, 2, 3], 
     [4, 5, 6],
 ])

@@ -1,6 +1,6 @@
 import os, sys, csv
+import math
 from collections import defaultdict
-import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
@@ -11,8 +11,7 @@ from pitensor.nn.layers import Sequential, Conv2D, Linear, ReLU, MaxPool2D, Soft
 from pitensor.nn.losses import CrossEntropyLoss
 from pitensor.nn.optimizers import Optimizer, SGD
 from pitensor.metrics import precision_score, recall_score, f1_score
-# Use the data loader to load the MNIST dataset:
-from playground.data_loaders.digit_recognizer import load_digit_recognizer
+from pitensor.Tensor import Tensor
 # Import the necessary modules to plot the images:
 import matplotlib.pyplot as plt
 
@@ -55,7 +54,7 @@ class ClassificationNetwork:
         grad = self.loss.backward()
         return self.layers.backward(grad)
 
-    def train_step(self, input: np.ndarray, targets: np.ndarray, optimizer: Union[Optimizer, None] = None):
+    def train_step(self, input: Tensor, targets: Tensor, optimizer: Union[Optimizer, None] = None):
         predictions = self.layers.forward(input)
         loss = self.loss.forward(predictions, targets)
         if optimizer is not None:
@@ -71,8 +70,8 @@ class ClassificationNetwork:
 
     def train(
             self, 
-            train_data: np.ndarray, train_labels: np.ndarray, 
-            val_data: np.ndarray, val_labels: np.ndarray, 
+            train_data: Tensor, train_labels: Tensor, 
+            val_data: Tensor, val_labels: Tensor, 
             epochs: int, batch_size: int, optimizer: Optimizer, 
             save_dir_path: str,
             min_f1_score: float = 0.95
@@ -99,7 +98,7 @@ class ClassificationNetwork:
             for i in epoch_run:
 
                 batch_data = train_data[i*batch_size : (i + 1)*batch_size]
-                batch_labels = train_labels[i*batch_size : (i + 1)*batch_size].astype(np.int64)
+                batch_labels = train_labels[i*batch_size : (i + 1)*batch_size].astype(Tensor.int64)
 
                 predictions, loss = self.train_step(batch_data, batch_labels, optimizer)
                 train_loss += loss
@@ -118,18 +117,18 @@ class ClassificationNetwork:
             for i in range(val_batches):
                 
                 batch_data = val_data[i * batch_size:(i + 1) * batch_size]
-                batch_labels = val_labels[i * batch_size:(i + 1) * batch_size].astype(np.int64)
+                batch_labels = val_labels[i * batch_size:(i + 1) * batch_size].astype(Tensor.int64)
 
                 predictions, loss = self.train_step(batch_data, batch_labels, optimizer = None)
                 
-                val_predictions.append(np.argmax(predictions, axis=1))
+                val_predictions.append(predictions.argmax(axis=1))
                 val_loss += loss
                 
                 val_targets.append(batch_labels)
 
             val_loss /= val_batches
-            val_predictions = np.concatenate(val_predictions)
-            val_targets = np.concatenate(val_targets)
+            val_predictions = Tensor.concatenate(val_predictions)
+            val_targets = Tensor.concatenate(val_targets)
 
             precision, recall, f1 = self.evaluate_metrics(val_predictions, val_targets)
 
@@ -152,12 +151,12 @@ class ClassificationNetwork:
         params = dict(
             layers = self.layers.get_parameters(),
         )
-        np.save(file_path, params, allow_pickle=True)
+        Tensor.save(file_path, params, allow_pickle=True)
         print(f"Model parameters saved to {file_path}")
 
     def load_parameters(self, file_path):
         try:
-            params = np.load(file_path, allow_pickle=True).item()
+            params = Tensor.load(file_path, allow_pickle=True).item()
             for (layer_idx, layer), layer_params in zip(enumerate(self.layers), params["layers"]):
                 self.layers[layer_idx].update_parameters(layer_params)
             print(f"Model parameters loaded from {file_path}")
@@ -166,7 +165,7 @@ class ClassificationNetwork:
 
     def predict(self, input):
         predictions = self.layers.forward(input)
-        return np.argmax(predictions, axis=1)
+        return predictions.argmax(axis=1)
 
 # region plots
 
@@ -191,7 +190,7 @@ def plot_training_history(csv_path: str, save_path: str = None):
     with open(csv_path, 'r') as f:
         reader = csv.reader(f)
         headers = next(reader) # Read the header row
-        data = np.array([list(map(float, row)) for row in reader]) # Convert rows to NumPy array
+        data = Tensor.array([list(map(float, row)) for row in reader]) # Convert rows to array
 
     # Find column indices dynamically
     col_idx = {col: headers.index(col) for col in ["train_loss", "val_loss", "precision", "recall", "f1"]}
@@ -232,16 +231,16 @@ def plot_training_history(csv_path: str, save_path: str = None):
         plt.show()
     plt.close()
 
-def capture_activations(layers: Sequential, input_sample: np.ndarray):
+def capture_activations(layers: Sequential, input_sample: Tensor):
     """
     Runs a forward pass and captures the output after each layer.
 
     Args:
         layers (Sequential): Model layers.
-        input_sample (np.ndarray): Input sample or batch.
+        input_sample (Tensor): Input sample or batch.
 
     Returns:
-        list[tuple[str, np.ndarray]]: (layer_name, activation) pairs.
+        list[tuple[str, Tensor]]: (layer_name, activation) pairs.
     """
     activations = []
     current = input_sample
@@ -252,7 +251,7 @@ def capture_activations(layers: Sequential, input_sample: np.ndarray):
 
 def visualize_layer_learning(
     layers: Sequential,
-    input_sample: np.ndarray,
+    input_sample: Tensor,
     save_dir_path: str,
     prefix: str = "sample"
 ):
@@ -275,7 +274,7 @@ def visualize_layer_learning(
             feature_maps = activation[0]
             num_maps = min(8, feature_maps.shape[0])
             cols = 4
-            rows = int(np.ceil(num_maps / cols))
+            rows = int(math.ceil(num_maps / cols))
             plt.figure(figsize=(cols * 3, rows * 3))
             for i in range(num_maps):
                 plt.subplot(rows, cols, i + 1)
@@ -290,7 +289,7 @@ def visualize_layer_learning(
             weights = layer.weights
             num_filters = min(8, weights.shape[0])
             cols = 4
-            rows = int(np.ceil(num_filters / cols))
+            rows = int(math.ceil(num_filters / cols))
             plt.figure(figsize=(cols * 3, rows * 3))
             for i in range(num_filters):
                 plt.subplot(rows, cols, i + 1)

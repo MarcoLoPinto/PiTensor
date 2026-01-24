@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 
-import numpy as np
+from pitensor.Tensor import Tensor
 
 from utils_mnist import ClassificationNetwork, build_mnist_layers
 
@@ -11,10 +11,10 @@ SCALE = 10
 CANVAS_SIZE = GRID_SIZE * SCALE
 
 
-def softmax(logits: np.ndarray) -> np.ndarray:
-    shifted = logits - np.max(logits)
-    exps = np.exp(shifted)
-    return exps / np.sum(exps)
+def softmax(logits: Tensor) -> Tensor:
+    shifted = logits - logits.max()
+    exps = Tensor.exp(shifted)
+    return exps / exps.sum()
 
 
 class WhiteboardApp:
@@ -22,7 +22,7 @@ class WhiteboardApp:
         self.root = root
         self.root.title("PiTensor MNIST Whiteboard")
 
-        self.pixels = np.zeros((GRID_SIZE, GRID_SIZE), dtype=np.float32)
+        self.pixels = Tensor.zeros((GRID_SIZE, GRID_SIZE), dtype=Tensor.float32)
         self.rects = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
         self.approach = tk.StringVar(value="mlp")
@@ -183,9 +183,9 @@ class WhiteboardApp:
             input_data = img.reshape(1, 1, GRID_SIZE, GRID_SIZE)
 
         logits = self.net.layers.forward(input_data)
-        pred = int(np.argmax(logits, axis=1)[0])
+        pred = int(logits.argmax(axis=1)[0])
         probs = softmax(logits[0])
-        top3 = np.argsort(-probs)[:3]
+        top3 = (-probs).argsort()[:3]
         top3_str = ", ".join([f"{i}:{probs[i]:.2f}" for i in top3])
         self.prediction.set(f"Prediction: {pred} (top-3: {top3_str})")
 
